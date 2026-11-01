@@ -9,7 +9,7 @@ export async function GET() {
 
     const { data, filename } = await createBackup(session.id);
 
-    return new NextResponse(new Blob([data]), {
+    return new NextResponse(data as unknown as BodyInit, {
       headers: {
         'Content-Type':        'application/octet-stream',
         'Content-Disposition': `attachment; filename="${filename}"`,

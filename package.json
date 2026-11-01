@@ -37,7 +37,14 @@
       "package.json"
     ],
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "artifactName": "${productName}-${version}-Setup.${ext}"
     },
     "nsis": {
@@ -47,19 +54,28 @@
       "createStartMenuShortcut": true
     },
     "mac": {
-      "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
       "artifactName": "${productName}-${version}-${arch}.${ext}",
       "category": "public.app-category.business"
     }
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/adapter-better-sqlite3": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
     "fast-xml-parser": "^5.4.2",
     "lucide-react": "^0.576.0",
     "next": "16.1.6",
     "pdfkit": "^0.17.2",
-    "prisma": "^5.22.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.7.0"
@@ -78,8 +94,13 @@
     "electron-builder": "^26.8.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "prisma": "^7.10.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.18"
+  },
+  "allowScripts": {
+    "better-sqlite3@12.11.1": true,
+    "better-sqlite3@13.0.3": true
   }
 }

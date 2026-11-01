@@ -24,10 +24,12 @@ export async function GET(_req: NextRequest, { params }: Params) {
       where: { id: contractId },
       include: {
         tenant: true,
-        unit:   {
+        unit: {
           include: {
-            property: {
+            property: true,
+            owners: {
               include: { owner: true },
+              orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }],
             },
           },
         },
@@ -44,6 +46,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
       ...bindContractData({
         tenant:   contract.tenant,
         property: contract.unit.property,
+        unit: {
+          unitNo:   contract.unit.unitNo,
+          floor:    contract.unit.floor,
+          type:     contract.unit.type,
+          grossSqm: contract.unit.grossSqm,
+          netSqm:   contract.unit.netSqm,
+          owners:   contract.unit.owners,
+        },
         contract: {
           startDate:     contract.startDate,
           endDate:       contract.endDate,
@@ -52,17 +62,18 @@ export async function GET(_req: NextRequest, { params }: Params) {
           currency:      contract.currency,
           paymentDay:    contract.paymentDay,
           depositAmount: contract.depositAmount,
-          unitNo:        contract.unit.unitNo,
+          depositStatus: contract.depositStatus,
           bankName:      contract.bankName,
           iban:          contract.iban,
           accountHolder: contract.accountHolder,
+          unitNo:        contract.unit.unitNo,
         },
       }),
-      // Office fields — usable as {{officeName}}, {{managerName}}, etc. in contract templates
-      officeName:  office.officeName,
-      managerName: office.managerName,
-      officePhone: office.phone,
-      officeEmail: office.email,
+      // Office fields — usable as {{officeName}}, {{managerName}}, etc.
+      officeName:    office.officeName,
+      managerName:   office.managerName,
+      officePhone:   office.phone,
+      officeEmail:   office.email,
       officeAddress: office.address,
     };
 
@@ -72,8 +83,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     const filename = `sozlesme-${contractId}.pdf`;
 
-    return new NextResponse(new Blob([pdfBuffer]), {
-      status:  200,
+    return new NextResponse(pdfBuffer as unknown as BodyInit, {
+      status: 200,
       headers: {
         'Content-Type':        'application/pdf',
         'Content-Disposition': `attachment; filename="${filename}"`,

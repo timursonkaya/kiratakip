@@ -5,7 +5,7 @@ import { getSession } from '@/lib/auth';
 import { getUserDb } from '@/lib/user-db';
 import { redirect } from 'next/navigation';
 import { Card, PageHeader, DataTable, Td, TRow, Badge, Money, EmptyState } from '@/components/ui';
-import AddForm from '@/components/AddForm';
+import UnitAddForm from './UnitAddForm';
 import { DeleteButton } from '@/components/DeleteButton';
 import { DoorOpen } from 'lucide-react';
 
@@ -22,7 +22,7 @@ const COLS = [
   { label: 'Durum'     },
   { label: 'Kiracı'    },
   { label: 'Kira', right: true },
-  { label: '', w: 56   },
+  { label: '', w: 120  },
 ];
 
 export default async function UnitsPage() {
@@ -49,21 +49,7 @@ export default async function UnitsPage() {
     <div>
       <PageHeader
         title="Daireler"
-        action={
-          <AddForm endpoint="/api/units" title="Yeni Daire" fields={[
-            { name: 'propertyId', label: 'Bina',      required: true, options: properties.map(p => ({ value: String(p.id), label: p.title })) },
-            { name: 'unitNo',     label: 'Daire No',  required: true, placeholder: 'D-3' },
-            { name: 'floor',      label: 'Kat',       type: 'number' },
-            { name: 'type',       label: 'Tür', options: [
-              { value: 'residential', label: 'Konut'   },
-              { value: 'commercial',  label: 'Ticari'  },
-              { value: 'parking',     label: 'Otopark' },
-              { value: 'storage',     label: 'Depo'    },
-            ]},
-            { name: 'netSqm',   label: 'Net m²',  type: 'number' },
-            { name: 'grossSqm', label: 'Brüt m²', type: 'number' },
-          ]} />
-        }
+        action={<UnitAddForm properties={properties} />}
       />
       <Card>
         {units.length === 0 ? (
@@ -95,7 +81,19 @@ export default async function UnitsPage() {
                       : <span style={{ color: 'var(--subtle)' }}>—</span>}
                   </Td>
                   <Td action>
-                    <DeleteButton endpoint={`/api/units/${u.id}`} label={`${u.property.title} — ${u.unitNo}`} errorAction={{ label: 'Sözleşmelere Git', href: '/contracts' }} />
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                      <Link
+                        href={`/units/${u.id}/edit`}
+                        style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--primary)' }}
+                      >
+                        Düzenle
+                      </Link>
+                      <DeleteButton
+                        endpoint={`/api/units/${u.id}`}
+                        label={`${u.property.title} — ${u.unitNo}`}
+                        errorAction={{ label: 'Sözleşmelere Git', href: '/contracts' }}
+                      />
+                    </div>
                   </Td>
                 </TRow>
               );

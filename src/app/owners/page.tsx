@@ -13,7 +13,7 @@ export default async function OwnersPage() {
   const db = getUserDb(session.id);
 
   const owners = await db.owner.findMany({
-    include: { _count: { select: { properties: true } } },
+    include: { _count: { select: { units: true } } },
     orderBy: { createdAt: 'desc' },
   });
 

@@ -6,24 +6,19 @@ function fmtTRY(n: number) {
   return `₺${Math.abs(n).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function Item({ label, value, color, align = 'left' }: {
-  label: string;
-  value: string;
-  color: string;
-  align?: 'left' | 'center' | 'right';
-}) {
+function Item({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div style={{ textAlign: align }}>
+    <div>
       <p style={{
-        fontSize: '0.625rem', fontWeight: 700,
-        color: 'var(--subtle)', textTransform: 'uppercase',
-        letterSpacing: '0.09em', marginBottom: 6,
+        fontSize: '0.6875rem', fontWeight: 600,
+        color: 'var(--muted)', textTransform: 'uppercase',
+        letterSpacing: '0.06em', marginBottom: 4,
       }}>
         {label}
       </p>
       <p style={{
         fontSize: '1.125rem', fontWeight: 700,
-        color, letterSpacing: '-0.03em',
+        color, letterSpacing: '-0.02em',
         fontFamily: 'ui-monospace, monospace',
         margin: 0,
       }}>
@@ -36,17 +31,14 @@ function Item({ label, value, color, align = 'left' }: {
 export function BudgetSummary({ gelir, gider }: Props) {
   const net = gelir - gider;
   return (
-    <Card style={{ padding: '14px 24px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr 1px 1fr', gap: 0, alignItems: 'center' }}>
-        <Item label="Gelir" value={fmtTRY(gelir)} color="var(--green)" />
-        <div style={{ background: 'var(--border)', height: 36, width: 1 }} />
-        <Item label="Gider" value={fmtTRY(gider)} color="var(--red)" align="center" />
-        <div style={{ background: 'var(--border)', height: 36, width: 1 }} />
+    <Card style={{ padding: '16px 24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+        <Item label="Gelir"  value={fmtTRY(gelir)} color="var(--green)" />
+        <Item label="Gider"  value={fmtTRY(gider)} color="var(--red)"   />
         <Item
           label="Net"
           value={(net < 0 ? '−' : '') + fmtTRY(net)}
           color={net >= 0 ? 'var(--green)' : 'var(--red)'}
-          align="right"
         />
       </div>
     </Card>

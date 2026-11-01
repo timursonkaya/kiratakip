@@ -15,7 +15,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
       include: {
         unit: {
           include: {
-            property: { include: { owner: { select: { id: true, name: true, phone: true } } } },
+            property: { select: { id: true, title: true } },
+			owners: {
+				include: { owner: { select: { id: true, name: true, phone: true } } },
+				orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }],
+			},
           },
         },
         tenant: true,

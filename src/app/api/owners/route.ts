@@ -10,8 +10,15 @@ export async function GET() {
 
     const owners = await db.owner.findMany({
       where: { isArchived: false },
-      include: { _count: { select: { properties: true } } },
-      orderBy: { createdAt: 'desc' },
+      include: {
+        units: {
+          include: {
+            unit: { include: { property: { select: { id: true, title: true } } } },
+          },
+          orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }],
+        },
+      },
+      orderBy: { name: 'asc' },
     });
     return NextResponse.json(owners);
   } catch (e: unknown) {
@@ -28,12 +35,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, phone, email, nationalId, address, notes } = body;
 
-    if (!name?.trim()) {
-      return NextResponse.json({ error: 'name zorunlu' }, { status: 400 });
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return NextResponse.json({ error: 'Ad zorunludur' }, { status: 400 });
     }
 
     const owner = await db.owner.create({
-      data: { name: name.trim(), phone, email, nationalId, address, notes },
+      data: {
+        name: name.trim(),
+        phone:      phone      || null,
+        email:      email      || null,
+        nationalId: nationalId || null,
+        address:    address    || null,
+        notes:      notes      || null,
+      },
     });
     return NextResponse.json(owner, { status: 201 });
   } catch (e: unknown) {

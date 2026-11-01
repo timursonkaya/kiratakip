@@ -14,7 +14,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const unit = await db.unit.findUnique({
       where: { id: Number(id) },
       include: {
-        property: { select: { id: true, title: true, owner: { select: { id: true, name: true } } } },
+        property: { select: { id: true, title: true } },
+        owners: {
+          include: { owner: true },
+          orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }],
+        },
         contracts: {
           orderBy: { startDate: 'desc' },
           include: { tenant: { select: { id: true, name: true, phone: true } } },
@@ -35,7 +39,22 @@ export async function PUT(req: NextRequest, { params }: Params) {
     const db = getUserDb(session.id);
 
     const { id } = await params;
-    const { unitNo, floor, type, grossSqm, netSqm, status } = await req.json();
+    const { unitNo, floor, type, grossSqm, netSqm, status, owners } = await req.json();
+
+    if (owners !== undefined) {
+      if (!Array.isArray(owners)) {
+        return NextResponse.json({ error: 'Geçersiz sahip listesi' }, { status: 400 });
+      }
+      const primaryCount = owners.filter((o: any) => o.isPrimary).length;
+      if (primaryCount > 1) {
+        return NextResponse.json(
+          { error: 'Yalnızca bir birincil sahip seçilebilir' },
+          { status: 400 }
+        );
+      }
+      if (owners.length > 0 && primaryCount === 0) owners[0].isPrimary = true;
+    }
+
     const unit = await db.unit.update({
       where: { id: Number(id) },
       data: {
@@ -43,6 +62,24 @@ export async function PUT(req: NextRequest, { params }: Params) {
         floor:    floor    != null ? Number(floor)    : undefined,
         grossSqm: grossSqm != null ? Number(grossSqm) : undefined,
         netSqm:   netSqm   != null ? Number(netSqm)   : undefined,
+        ...(owners !== undefined
+          ? {
+              owners: {
+                deleteMany: {},
+                create: owners.map((o: any) => ({
+                  ownerId: Number(o.ownerId),
+                  share: o.share != null ? Number(o.share) : null,
+                  isPrimary: !!o.isPrimary,
+                })),
+              },
+            }
+          : {}),
+      },
+      include: {
+        owners: {
+          include: { owner: true },
+          orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }],
+        },
       },
     });
     return NextResponse.json(unit);
@@ -58,26 +95,10 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     const db = getUserDb(session.id);
 
     const { id } = await params;
-    const unitId = Number(id);
-    const unit = await db.unit.findUnique({ where: { id: unitId } });
+    const unit = await db.unit.findUnique({ where: { id: Number(id) } });
     if (!unit) return NextResponse.json({ error: 'Bulunamadı' }, { status: 404 });
-
-    // Cascade hard delete: payments → charges → contracts → unit
-    const contracts = await db.contract.findMany({ where: { unitId }, select: { id: true } });
-    const contractIds = contracts.map(c => c.id);
-    if (contractIds.length > 0) {
-      const charges = await db.rentCharge.findMany({ where: { contractId: { in: contractIds } }, select: { id: true } });
-      const chargeIds = charges.map(c => c.id);
-      if (chargeIds.length > 0) {
-        await db.payment.deleteMany({ where: { rentChargeId: { in: chargeIds } } });
-        await db.rentCharge.deleteMany({ where: { id: { in: chargeIds } } });
-      }
-      await db.contractIncrease.deleteMany({ where: { contractId: { in: contractIds } } });
-      await db.depositTransaction.deleteMany({ where: { contractId: { in: contractIds } } });
-      await db.contract.deleteMany({ where: { id: { in: contractIds } } });
-    }
-    await db.unit.delete({ where: { id: unitId } });
-    return NextResponse.json({ ok: true });
+    await db.unit.update({ where: { id: Number(id) }, data: { isArchived: true } });
+    return NextResponse.json({ ok: true, message: 'Daire arşivlendi' });
   } catch (e: unknown) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }

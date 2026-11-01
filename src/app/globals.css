@@ -244,71 +244,20 @@ label {
 [data-theme="light"] .sb-footer-item { color: var(--subtle) !important; }
 [data-theme="light"] .sb-footer-item:hover { color: var(--muted) !important; }
 
-/* ── Collapsed icon mode ─────────────────────────────── */
-.sb-group-collapsed { margin-bottom: 0; }
-
-/* Row wrapper — centers the icon button in the collapsed panel */
-.sb-icon-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 3px 0;
-  text-decoration: none;
-  background: none;
-}
-
-/* The actual icon button — 36×36 square */
-.sb-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  color: rgba(255,255,255,0.36);
-  transition: background 0.12s, color 0.12s;
-  flex-shrink: 0;
-}
-.sb-icon:hover {
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.80);
-}
-.sb-icon.active {
-  background: rgba(79,140,255,0.14);
-  color: #7EB6FF;
-  border: 1px solid rgba(79,140,255,0.22);
-}
-[data-theme="light"] .sb-icon { color: var(--muted); }
-[data-theme="light"] .sb-icon:hover { background: rgba(0,0,0,0.06); color: var(--text); }
-[data-theme="light"] .sb-icon.active { background: rgba(59,127,255,0.10); color: var(--primary); border-color: rgba(59,127,255,0.22); }
-
 /* ══════════════════════════════════════════════════════
    TOPBAR — Primary action buttons
    ══════════════════════════════════════════════════════ */
 .tb-action {
   display: inline-flex; align-items: center; gap: 5px;
-  height: 32px; padding: 0 11px; border-radius: 8px;
+  height: 28px; padding: 0 10px; border-radius: 6px;
   font-size: 0.8125rem; font-weight: 500;
-  color: rgba(255,255,255,0.55);
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.09);
+  color: var(--muted); background: transparent;
+  border: 1px solid var(--border);
   text-decoration: none;
-  transition: color 0.12s, background 0.12s, border-color 0.12s;
+  transition: color 0.1s, background 0.1s, border-color 0.1s;
   white-space: nowrap;
-  letter-spacing: -0.01em;
 }
 .tb-action:hover {
-  color: rgba(255,255,255,0.88);
-  background: rgba(255,255,255,0.07);
-  border-color: rgba(255,255,255,0.13);
-}
-[data-theme="light"] .tb-action {
-  color: var(--muted);
-  background: var(--surface);
-  border-color: var(--border);
-}
-[data-theme="light"] .tb-action:hover {
   color: var(--text);
   background: var(--surface2);
   border-color: var(--border-s);

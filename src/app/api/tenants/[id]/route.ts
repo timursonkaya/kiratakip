@@ -54,26 +54,21 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     const db = getUserDb(session.id);
 
     const { id } = await params;
-    const tenantId = Number(id);
-    const tenant = await db.tenant.findUnique({ where: { id: tenantId } });
+    const tenant = await db.tenant.findUnique({ where: { id: Number(id) } });
     if (!tenant) return NextResponse.json({ error: 'Bulunamadı' }, { status: 404 });
 
-    // Cascade hard delete: payments → charges → contracts → tenant
-    const contracts = await db.contract.findMany({ where: { tenantId }, select: { id: true } });
-    const contractIds = contracts.map(c => c.id);
-    if (contractIds.length > 0) {
-      const charges = await db.rentCharge.findMany({ where: { contractId: { in: contractIds } }, select: { id: true } });
-      const chargeIds = charges.map(c => c.id);
-      if (chargeIds.length > 0) {
-        await db.payment.deleteMany({ where: { rentChargeId: { in: chargeIds } } });
-        await db.rentCharge.deleteMany({ where: { id: { in: chargeIds } } });
-      }
-      await db.contractIncrease.deleteMany({ where: { contractId: { in: contractIds } } });
-      await db.depositTransaction.deleteMany({ where: { contractId: { in: contractIds } } });
-      await db.contract.deleteMany({ where: { id: { in: contractIds } } });
+    const activeContracts = await db.contract.count({
+      where: { tenantId: Number(id), status: 'active' },
+    });
+    if (activeContracts > 0) {
+      return NextResponse.json(
+        { error: 'Aktif sözleşmesi olan kiracı arşivlenemez. Önce sözleşmeyi sonlandırın.' },
+        { status: 409 },
+      );
     }
-    await db.tenant.delete({ where: { id: tenantId } });
-    return NextResponse.json({ ok: true });
+
+    await db.tenant.update({ where: { id: Number(id) }, data: { isArchived: true } });
+    return NextResponse.json({ ok: true, message: 'Kiracı arşivlendi' });
   } catch (e: unknown) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }

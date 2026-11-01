@@ -383,26 +383,26 @@ export function Topbar() {
     <header style={{
       position: 'sticky', top: 0, zIndex: 40,
       height: 56, flexShrink: 0,
-      background: 'var(--bg)',
-      borderBottom: '1px solid rgba(255,255,255,0.07)',
+      background: 'var(--surface)',
+      borderBottom: '1px solid var(--border)',
       display: 'flex', alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 32px',
+      padding: '0 20px 0 24px',
       gap: 12,
     }}>
       {/* Left: breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.8125rem', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.875rem', flexShrink: 0 }}>
         {!isRoot && (
           <>
-            <span style={{ color: 'var(--subtle)', fontWeight: 400 }}>Kira Takip</span>
-            <ChevronRight size={13} strokeWidth={1.75} color="var(--subtle)" style={{ opacity: 0.5 }} />
+            <span style={{ color: 'var(--subtle)' }}>Kira Takip</span>
+            <ChevronRight size={14} strokeWidth={2} color="var(--border-s)" />
           </>
         )}
         <span style={{ color: 'var(--text)', fontWeight: 600 }}>{label}</span>
       </div>
 
       {/* Right: primary actions + utilities */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
 
         {/* Primary workflow actions */}
         {PRIMARY_ACTIONS.map(({ href, label: lbl, icon: Icon }) => (
@@ -413,7 +413,7 @@ export function Topbar() {
         ))}
 
         {/* Separator */}
-        <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.09)', margin: '0 6px', flexShrink: 0 }} />
+        <div style={{ width: 1, height: 20, background: 'var(--border)', margin: '0 4px', flexShrink: 0 }} />
 
         {/* Utilities */}
         <GlobalSearch />

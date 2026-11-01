@@ -1,42 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { getUserDb } from '@/lib/user-db';
+import { unitWithOwners } from '@/lib/prisma-includes';
 
+// GET /api/units?propertyId=1
 export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Yetkisiz' }, { status: 401 });
     const db = getUserDb(session.id);
 
-    const { searchParams } = new URL(req.url);
-    const propertyId = searchParams.get('property_id');
-    const status     = searchParams.get('status');
+    const propertyId = req.nextUrl.searchParams.get('propertyId');
 
     const units = await db.unit.findMany({
       where: {
         isArchived: false,
         ...(propertyId ? { propertyId: Number(propertyId) } : {}),
-        ...(status     ? { status: status as 'vacant' | 'occupied' | 'maintenance' } : {}),
       },
       include: {
-        property: { select: { id: true, title: true } },
-        contracts: {
-          where: { status: 'active' },
-          select: {
-            id: true, rentAmount: true, currency: true,
-            tenant: { select: { id: true, name: true, phone: true } },
-          },
-          take: 1,
-        },
+        ...unitWithOwners,
+        property: true,
       },
-      orderBy: [{ propertyId: 'asc' }, { unitNo: 'asc' }],
+      orderBy: { unitNo: 'asc' },
     });
+
     return NextResponse.json(units);
   } catch (e: unknown) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }
 
+// POST /api/units
+// body: { propertyId, unitNo, floor?, type?, grossSqm?, netSqm?, status?,
+//         owners: [{ ownerId, share?, isPrimary? }] }
 export async function POST(req: NextRequest) {
   try {
     const session = await getSession();
@@ -44,22 +40,38 @@ export async function POST(req: NextRequest) {
     const db = getUserDb(session.id);
 
     const body = await req.json();
-    const { propertyId, unitNo, floor, type, grossSqm, netSqm } = body;
+    const { owners = [], ...unitData } = body;
 
-    if (!propertyId || !unitNo?.trim()) {
-      return NextResponse.json({ error: 'propertyId ve unitNo zorunlu' }, { status: 400 });
+    if (!Array.isArray(owners) || owners.length === 0) {
+      return NextResponse.json(
+        { error: 'En az bir sahip seçilmelidir' },
+        { status: 400 }
+      );
     }
+
+    const primaryCount = owners.filter((o: any) => o.isPrimary).length;
+    if (primaryCount > 1) {
+      return NextResponse.json(
+        { error: 'Yalnızca bir birincil sahip seçilebilir' },
+        { status: 400 }
+      );
+    }
+    if (primaryCount === 0) owners[0].isPrimary = true;
 
     const unit = await db.unit.create({
       data: {
-        propertyId: Number(propertyId),
-        unitNo: unitNo.trim(),
-        floor: floor ? Number(floor) : null,
-        type,
-        grossSqm: grossSqm ? Number(grossSqm) : null,
-        netSqm:   netSqm   ? Number(netSqm)   : null,
+        ...unitData,
+        owners: {
+          create: owners.map((o: any) => ({
+            ownerId: Number(o.ownerId),
+            share: o.share != null ? Number(o.share) : null,
+            isPrimary: !!o.isPrimary,
+          })),
+        },
       },
+      include: unitWithOwners,
     });
+
     return NextResponse.json(unit, { status: 201 });
   } catch (e: unknown) {
     return NextResponse.json({ error: (e as Error).message }, { status: 400 });

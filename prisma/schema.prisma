@@ -5,27 +5,25 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
 }
 
 model Owner {
-  id         Int        @id @default(autoincrement())
+  id         Int         @id @default(autoincrement())
   name       String
   phone      String?
   email      String?
-  nationalId String?    @map("national_id")
+  nationalId String?     @map("national_id")
   address    String?
   notes      String?
-  isArchived Boolean    @default(false) @map("is_archived")
-  createdAt  DateTime   @default(now()) @map("created_at")
-  properties Property[]
+  isArchived Boolean     @default(false) @map("is_archived")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  units      UnitOwner[]
 
   @@map("owners")
 }
 
 model Property {
   id         Int       @id @default(autoincrement())
-  ownerId    Int       @map("owner_id")
   title      String
   address    String?
   city       String?
@@ -33,11 +31,24 @@ model Property {
   type       String    @default("apartment")
   isArchived Boolean   @default(false) @map("is_archived")
   createdAt  DateTime  @default(now()) @map("created_at")
-  expenses  Expense[]
-  owner     Owner     @relation(fields: [ownerId], references: [id])
-  units     Unit[]
+  expenses   Expense[]
+  units      Unit[]
 
   @@map("properties")
+}
+
+model UnitOwner {
+  id        Int      @id @default(autoincrement())
+  unitId    Int      @map("unit_id")
+  ownerId   Int      @map("owner_id")
+  share     Float?
+  isPrimary Boolean  @default(false) @map("is_primary")
+  createdAt DateTime @default(now()) @map("created_at")
+  unit      Unit     @relation(fields: [unitId], references: [id])
+  owner     Owner    @relation(fields: [ownerId], references: [id])
+
+  @@unique([unitId, ownerId])
+  @@map("unit_owners")
 }
 
 model Unit {
@@ -51,6 +62,7 @@ model Unit {
   status      String       @default("vacant")
   isArchived  Boolean      @default(false) @map("is_archived")
   createdAt   DateTime     @default(now()) @map("created_at")
+  owners      UnitOwner[]
   contracts   Contract[]
   rentCharges RentCharge[]
   property    Property     @relation(fields: [propertyId], references: [id])
@@ -184,7 +196,6 @@ model Expense {
 
   @@map("expenses")
 }
-
 
 model ExchangeRate {
   id          Int      @id @default(autoincrement())

@@ -91,36 +91,27 @@ export function Sidebar() {
         {/* ── Navigation ───────────────────────── */}
         <nav className="sb-nav">
           {GROUPS.map((group, i) => (
-            <div key={group.label} className={`sb-group${collapsed ? ' sb-group-collapsed' : ''}`}>
+            <div key={group.label} className="sb-group">
               {!collapsed && (
                 <span className="sb-group-label">{group.label}</span>
               )}
-              {collapsed && i > 0 && <div style={{ height: 6 }} />}
+              {collapsed && i > 0 && <div style={{ height: 8 }} />}
 
               {group.items.map(({ href, label, icon: Icon }) => {
                 const active = href === '/' ? pathname === '/' : pathname.startsWith(href);
-                if (collapsed) {
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      title={label}
-                      className="sb-icon-wrap"
-                    >
-                      <span className={active ? 'sb-icon active' : 'sb-icon'}>
-                        <Icon size={16} strokeWidth={active ? 2 : 1.75} />
-                      </span>
-                    </Link>
-                  );
-                }
                 return (
                   <Link
                     key={href}
                     href={href}
+                    title={collapsed ? label : undefined}
                     className={`sb-item${active ? ' active' : ''}`}
+                    style={{
+                      justifyContent: collapsed ? 'center' : 'flex-start',
+                      padding:        collapsed ? '9px 0' : '7px 10px',
+                    }}
                   >
                     <Icon size={15} strokeWidth={active ? 2.5 : 1.75} style={{ flexShrink: 0 }} />
-                    <span>{label}</span>
+                    {!collapsed && <span>{label}</span>}
                   </Link>
                 );
               })}
@@ -130,34 +121,31 @@ export function Sidebar() {
 
         {/* ── Footer ───────────────────────────── */}
         <div className="sb-footer">
-          {collapsed ? (
-            <>
-              <div className="sb-icon-wrap">
-                <Link
-                  href="/settings"
-                  title="Ayarlar"
-                  className={pathname === '/settings' ? 'sb-icon active' : 'sb-icon'}
-                >
-                  <Settings size={15} strokeWidth={1.75} />
-                </Link>
-              </div>
-              <button
-                onClick={toggle}
-                className="sb-icon-wrap sb-icon"
-                title="Genişlet"
-                style={{ width: '100%', border: 'none', cursor: 'pointer', background: 'none' }}
-              >
-                <PanelLeftOpen size={14} strokeWidth={1.75} />
-              </button>
-            </>
-          ) : (
-            <Link
-              href="/settings"
-              className={`sb-item sb-footer-item${pathname === '/settings' ? ' active' : ''}`}
+          <Link
+            href="/settings"
+            title={collapsed ? 'Ayarlar' : undefined}
+            className={`sb-item sb-footer-item${pathname === '/settings' ? ' active' : ''}`}
+            style={{
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              padding:        collapsed ? '8px 0' : '7px 10px',
+            }}
+          >
+            <Settings size={14} strokeWidth={1.75} style={{ flexShrink: 0 }} />
+            {!collapsed && <span>Ayarlar</span>}
+          </Link>
+
+          {collapsed && (
+            <button
+              onClick={toggle}
+              className="sb-item sb-footer-item"
+              title="Genişlet"
+              style={{
+                justifyContent: 'center', padding: '8px 0',
+                width: '100%', border: 'none', cursor: 'pointer',
+              }}
             >
-              <Settings size={14} strokeWidth={1.75} style={{ flexShrink: 0 }} />
-              <span>Ayarlar</span>
-            </Link>
+              <PanelLeftOpen size={13} strokeWidth={1.75} />
+            </button>
           )}
         </div>
       </div>

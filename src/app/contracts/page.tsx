@@ -23,7 +23,7 @@ export default async function ContractsPage({
   const [contracts, vacantUnits, allUnits, tenants, owners] = await Promise.all([
     db.contract.findMany({
       where: ownerIdFilter
-        ? { unit: { property: { ownerId: ownerIdFilter } } }
+        ? { unit: { owners: { some: { ownerId: ownerIdFilter } } } }
         : {},
       include: {
         unit:   { select: { unitNo: true, property: { select: { title: true } } } },

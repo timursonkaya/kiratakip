@@ -19,7 +19,7 @@ function dayStart(d: Date): Date {
 // ── TCMB XML çek + parse ─────────────────────────────────────
 async function fetchFromTCMB(): Promise<{ rates: RateMap; xmlDate: Date } | null> {
   try {
-    const res = await fetch(TCMB_URL, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
+    const res = await fetch(TCMB_URL, { cache: 'no-store' });
     if (!res.ok) return null;
 
     const xml    = await res.text();

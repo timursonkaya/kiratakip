@@ -16,7 +16,7 @@ const COLS = [
   { label: 'E-posta'    },
   { label: 'Sözleşme', center: true },
   { label: 'Kayıt'      },
-  { label: '', w: 56   },
+  { label: '', w: 120   },
 ];
 
 export default async function TenantsPage() {
@@ -83,7 +83,19 @@ export default async function TenantsPage() {
                 </Td>
                 <Td muted>{date(t.createdAt)}</Td>
                 <Td action>
-                  <DeleteButton endpoint={`/api/tenants/${t.id}`} label={t.name} errorAction={{ label: 'Sözleşmelere Git', href: '/contracts' }} />
+                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <Link
+                      href={`/tenants/${t.id}/edit`}
+                      style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--primary)' }}
+                    >
+                      Düzenle
+                    </Link>
+                    <DeleteButton
+                      endpoint={`/api/tenants/${t.id}`}
+                      label={t.name}
+                      errorAction={{ label: 'Sözleşmelere Git', href: '/contracts' }}
+                    />
+                  </div>
                 </Td>
               </TRow>
             ))}

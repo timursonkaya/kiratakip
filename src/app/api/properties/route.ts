@@ -2,22 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { getUserDb } from '@/lib/user-db';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Yetkisiz' }, { status: 401 });
     const db = getUserDb(session.id);
 
-    const { searchParams } = new URL(req.url);
-    const ownerId = searchParams.get('owner_id');
-
     const properties = await db.property.findMany({
-      where: ownerId ? { ownerId: Number(ownerId), isArchived: false } : { isArchived: false },
+      where: { isArchived: false },
       include: {
-        owner: { select: { id: true, name: true } },
-        _count: { select: { units: true } },
+        units: {
+          where: { isArchived: false },
+          include: {
+            owners: {
+              include: { owner: true },
+              orderBy: [{ isPrimary: 'desc' }, { id: 'asc' }],
+            },
+          },
+        },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { title: 'asc' },
     });
     return NextResponse.json(properties);
   } catch (e: unknown) {
@@ -32,14 +36,21 @@ export async function POST(req: NextRequest) {
     const db = getUserDb(session.id);
 
     const body = await req.json();
-    const { ownerId, title, address, city, district, type } = body;
+    const { title, address, city, district, type } = body;
 
-    if (!ownerId || !title?.trim()) {
-      return NextResponse.json({ error: 'ownerId ve title zorunlu' }, { status: 400 });
+    if (!title || typeof title !== 'string' || !title.trim()) {
+      return NextResponse.json({ error: 'Başlık zorunludur' }, { status: 400 });
     }
 
+    // NOTE: ownerId is no longer accepted here — ownership is per unit
     const property = await db.property.create({
-      data: { ownerId: Number(ownerId), title: title.trim(), address, city, district, type },
+      data: {
+        title: title.trim(),
+        address: address || null,
+        city: city || null,
+        district: district || null,
+        type: type || 'apartment',
+      },
     });
     return NextResponse.json(property, { status: 201 });
   } catch (e: unknown) {

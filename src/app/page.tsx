@@ -160,7 +160,7 @@ export default async function Dashboard() {
       <RateBand />
 
       {/* ── KPI Row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, alignItems: 'stretch' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, alignItems: 'stretch' }}>
         <KpiCard
           icon={Banknote}
           label="Bu Ay Alacak"
@@ -196,7 +196,7 @@ export default async function Dashboard() {
       <BudgetSummary gelir={d.paid} gider={d.expenses} />
 
       {/* ── Chart + Donut + Quick Actions ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr minmax(240px, 280px) minmax(300px, 360px)', gap: 14, alignItems: 'stretch' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr minmax(240px, 280px) minmax(300px, 360px)', gap: 16, alignItems: 'stretch' }}>
 
         {/* Line chart */}
         <Card style={{ display: 'flex', flexDirection: 'column' }}>
@@ -257,7 +257,7 @@ export default async function Dashboard() {
       <FinancialCharts />
 
       {/* ── Bottom widgets ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, alignItems: 'stretch' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, alignItems: 'stretch' }}>
         <OverdueList charges={d.overdueCharges} />
         <UpcomingPayments />
         <ExpiringContracts />
